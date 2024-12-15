@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: spring-security-template
+
+logging:
+  level:
+    org.springframework.security: TRACE
