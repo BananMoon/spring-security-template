@@ -1,7 +1,9 @@
 package moon.thinkhard.spring_security_template.config;
 
+import moon.thinkhard.spring_security_template.filter.CustomAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,6 +26,11 @@ public class SecurityConfig {
                 )
                 .sessionManagement(sessionManagementConfig -> sessionManagementConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorizeRequest ->
+                        authorizeRequest.anyRequest().permitAll())
+                .formLogin(formLogin ->
+                        formLogin.successHandler(new CustomAuthenticationSuccessHandler()))
+                .httpBasic(Customizer.withDefaults())
                 .build();
     }
 }
