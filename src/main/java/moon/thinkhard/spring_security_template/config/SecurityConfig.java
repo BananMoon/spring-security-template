@@ -1,11 +1,14 @@
 package moon.thinkhard.spring_security_template.config;
 
-import moon.thinkhard.spring_security_template.filter.CustomAuthenticationSuccessHandler;
+import moon.thinkhard.spring_security_template.handler.CustomAuthenticationFailureHandler;
+import moon.thinkhard.spring_security_template.handler.CustomAuthenticationSuccessHandler;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -27,10 +30,22 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagementConfig -> sessionManagementConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequest ->
-                        authorizeRequest.anyRequest().permitAll())
-                .formLogin(formLogin ->
-                        formLogin.successHandler(new CustomAuthenticationSuccessHandler()))
+                        authorizeRequest.requestMatchers("/login.html", "/login", "/error").permitAll()
+                                .anyRequest().authenticated())
+                .formLogin(login ->
+                         login.loginPage("/login.html")
+                                 .usernameParameter("id")
+                                 .passwordParameter("password")
+                                 .loginProcessingUrl("/")
+                                 .successHandler(new CustomAuthenticationSuccessHandler())
+                                 .failureHandler(new CustomAuthenticationFailureHandler())
+                                 .permitAll())
                 .httpBasic(Customizer.withDefaults())
                 .build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 }
