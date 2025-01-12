@@ -1,23 +1,31 @@
 package moon.thinkhard.spring_security_template.config;
 
-import moon.thinkhard.spring_security_template.handler.CustomAuthenticationFailureHandler;
-import moon.thinkhard.spring_security_template.handler.CustomAuthenticationSuccessHandler;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
+import moon.thinkhard.spring_security_template.authentication.CustomAuthenticationFilter;
+import moon.thinkhard.spring_security_template.authentication.CustomAuthenticationProvider;
+import moon.thinkhard.spring_security_template.handler.CustomAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.XXssProtectionHeaderWriter;
 
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
+    private final CustomAuthenticationProvider customAuthenticationProvider;
+
+    public SecurityConfig(CustomAuthenticationProvider customAuthenticationProvider) {
+        this.customAuthenticationProvider = customAuthenticationProvider;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -27,25 +35,23 @@ public class SecurityConfig {
                         .xssProtection(xssProtection -> xssProtection.headerValue(XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
                         .referrerPolicy(referrerPolicyConfig -> referrerPolicyConfig.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER))
                 )
-                .sessionManagement(sessionManagementConfig -> sessionManagementConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequest ->
-                        authorizeRequest.requestMatchers("/login.html", "/login", "/error").permitAll()
+                        authorizeRequest.requestMatchers("/loginPage.html", "/login", "/error").permitAll()
+                                .requestMatchers("/nonMember").hasAuthority("read")
                                 .anyRequest().authenticated())
-                .formLogin(login ->
-                         login.loginPage("/login.html")
-                                 .usernameParameter("id")
-                                 .passwordParameter("password")
-                                 .loginProcessingUrl("/")
-                                 .successHandler(new CustomAuthenticationSuccessHandler())
-                                 .failureHandler(new CustomAuthenticationFailureHandler())
-                                 .permitAll())
+                .exceptionHandling(handling ->
+                        handling
+                                .accessDeniedHandler(new CustomAccessDeniedHandler())
+                )
                 .httpBasic(Customizer.withDefaults())
+                .addFilterBefore(new CustomAuthenticationFilter(new ProviderManager(customAuthenticationProvider)), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations());
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
