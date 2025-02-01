@@ -38,30 +38,21 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         if (!supports(authentication.getClass())) {
             return null;
         }
-        // authentication isInstanceOf check
-/*
-        Assert.isInstanceOf(CustomAuthenticationToken.class, authentication,
-                () -> this.messages.getMessage("CustomAuthenticationProvider.onlySupports",
-                        "Only CustomAuthenticationToken is supported"));
-*/
 
         String username = determineUsername(authentication);
         UserDetails user = retrieveUser(username);
-        return createSuccessAuthentication(username, authentication, user);
+        return createSuccessAuthentication(username, user);
     }
 
     /**
      * 인증에 성공하는 경우 필요한 사용자 정보를 담을 수 있는 Custom Authentication 객체를 생성하여 반환한다.
      * @param principal 사용자 관련 정보 (id/username, 사용자 이름 ..)
-     * @param authentication 인증 전 Authentication 객체
      * @param user 사용자 정보를 담는 UserDetails 객체
      * @return 인증에 성공한 Authentication 객체
      */
-    private Authentication createSuccessAuthentication(String principal, Authentication authentication, UserDetails user) {
-        // TODO password encoding 여부 결정 필요.
-        // this.passwordEncoder.encode(authentication.getCredentials())
+    private Authentication createSuccessAuthentication(String principal, UserDetails user) {
         logger.debug("Authenticated User");
-        return CustomAuthenticationToken.authenticated(principal, authentication.getCredentials(), user.getAuthorities());
+        return CustomAuthenticationToken.authenticated(principal, user.getAuthorities());
     }
 
     private String determineUsername(Authentication authentication) {

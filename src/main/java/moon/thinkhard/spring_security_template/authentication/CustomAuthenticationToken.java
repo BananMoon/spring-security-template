@@ -33,9 +33,15 @@ public class CustomAuthenticationToken implements Authentication {
         this.authorities = authorities;
     }
 
-    public static CustomAuthenticationToken authenticated(Object principal, Object credentials,
-                                                          Collection<? extends GrantedAuthority> authorities) {
-        return new CustomAuthenticationToken(principal, credentials, authorities);
+    /**
+     * 인증에 성공한 객체를 생성한다.
+     * 패스워드는 세팅하지 않는다.
+     * @param principal 사용자 관련 정보 (id/username, 사용자 이름 ..)
+     * @param authorities 사용자의 권한 정보
+     * @return 인증에 성공한 Authentication 객체
+     */
+    public static CustomAuthenticationToken authenticated(Object principal, Collection<? extends GrantedAuthority> authorities) {
+        return new CustomAuthenticationToken(principal, null, authorities);
     }
 
     @Override
@@ -63,7 +69,7 @@ public class CustomAuthenticationToken implements Authentication {
     }
 
     /**
-     * 인증 필터를 직접 커스터마이징한다면, 실제 호출되지 않음.
+     * 인증 필터를 직접 커스터마이징할 경우, 호출되지 않음.
      * @return 인증에 성공한 객체인지 여부
      */
     @Override
@@ -72,7 +78,7 @@ public class CustomAuthenticationToken implements Authentication {
     }
 
     /**
-     * 인증 필터를 직접 커스터마이징한다면, 실제 호출되지 않음.
+     * 인증 필터를 직접 커스터마이징할 경우, 호출되지 않음.
      */
     @Override
     public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
