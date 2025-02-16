@@ -9,7 +9,7 @@ import java.util.Collection;
 /**
  * Spring Security에서 사용자 인증을 표현한다. 사용자의 자격증명을 캡슐화하고 인증상태를 관리하는 것이 목적이다.
  */
-public class CustomAuthenticationToken implements Authentication {
+public class CustomAuthentication implements Authentication {
     /**
      * 사용자와 관련된 정보로, 일반적으로 인증 전에는 사용자 이름(id/username), 인증 후에는 UserDetails 객체 혹은 사용자 이름이 세팅된다.
      */
@@ -23,11 +23,11 @@ public class CustomAuthenticationToken implements Authentication {
      */
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public CustomAuthenticationToken(Object principal, Object credentials) {
+    public CustomAuthentication(Object principal, Object credentials) {
         this(principal, credentials, AuthorityUtils.NO_AUTHORITIES);
     }
 
-    private CustomAuthenticationToken(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
+    private CustomAuthentication(Object principal, Object credentials, Collection<? extends GrantedAuthority> authorities) {
         this.principal = principal;
         this.credentials = credentials;
         this.authorities = authorities;
@@ -40,8 +40,8 @@ public class CustomAuthenticationToken implements Authentication {
      * @param authorities 사용자의 권한 정보
      * @return 인증에 성공한 Authentication 객체
      */
-    public static CustomAuthenticationToken authenticated(Object principal, Collection<? extends GrantedAuthority> authorities) {
-        return new CustomAuthenticationToken(principal, null, authorities);
+    public static CustomAuthentication authenticated(Object principal, Collection<? extends GrantedAuthority> authorities) {
+        return new CustomAuthentication(principal, null, authorities);
     }
 
     @Override

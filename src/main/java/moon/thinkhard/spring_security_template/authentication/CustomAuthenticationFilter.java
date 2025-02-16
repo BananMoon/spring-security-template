@@ -29,7 +29,7 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException {
         LoginRequest requestBody = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
 
-        Authentication authRequest = new CustomAuthenticationToken(requestBody.getId(), requestBody.getPassword());
+        Authentication authRequest = new CustomAuthentication(requestBody.getId(), requestBody.getPassword());
         return this.getAuthenticationManager().authenticate(authRequest);
     }
 
