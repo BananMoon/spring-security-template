@@ -2,13 +2,13 @@ package moon.thinkhard.spring_security_template.authentication;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -18,10 +18,14 @@ import org.springframework.stereotype.Component;
 public class CustomAuthenticationProvider implements AuthenticationProvider {
     private final Log logger;
     private final UserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private final UserDetailsChecker userDetailsChecker;
 
-    public CustomAuthenticationProvider(UserDetailsService userDetailsService) {
+    public CustomAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
         this.logger = LogFactory.getLog(getClass());
         this.userDetailsService = userDetailsService;
+        this.userDetailsChecker = new CustomUserDetailsChecker();
     }
 
     /**
@@ -41,7 +45,28 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         String username = determineUsername(authentication);
         UserDetails user = retrieveUser(username);
+        this.userDetailsChecker.check(user);
+        additionalAuthenticationChecks(user, authentication);
+
         return createSuccessAuthentication(username, user);
+    }
+
+    /**
+     * 패스워드 검증한다.
+     * @param user DB에서 조회한 사용자
+     * @param authentication 요청자가 입력한 인증 정보
+     * @throws BadCredentialsException password가 null이거나 입력받은 password가 일치하지 않는 경우 발생한다.
+     */
+    private void additionalAuthenticationChecks(UserDetails user, Authentication authentication) {
+
+        if (authentication.getCredentials() == null) {
+            throw new BadCredentialsException("Failed to authenticate since no credentials provided");
+        }
+        String presentedPassword = authentication.getCredentials().toString();
+
+        if (!this.passwordEncoder.matches(presentedPassword, user.getPassword())) {
+            throw new BadCredentialsException("Failed to authenticate since password does not match stored value");
+        }
     }
 
     /**
@@ -52,7 +77,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
      */
     private Authentication createSuccessAuthentication(String principal, UserDetails user) {
         logger.debug("Authenticated User");
-        return CustomAuthenticationToken.authenticated(principal, user.getAuthorities());
+
+        return CustomAuthentication.authenticated(principal, user.getAuthorities());
     }
 
     private String determineUsername(Authentication authentication) {
@@ -66,12 +92,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
      */
     private UserDetails retrieveUser(String username) {
         try {
-            UserDetails loadedUser = this.userDetailsService.loadUserByUsername(username);
-
-            if (loadedUser == null) {
-                throw new UsernameNotFoundException(String.format("UserDetailsService returned null. (username: '%s')", username));
-            }
-            return loadedUser;
+            return this.userDetailsService.loadUserByUsername(username);
         } catch (Exception ex) {
             throw new InternalAuthenticationServiceException(ex.getMessage(), ex);
         }
@@ -86,6 +107,31 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     public boolean supports(Class<?> authentication) {
         logger.info("Invoking CustomAuthenticationProvider.supports(Class<?>)");
 
-        return (CustomAuthenticationToken.class.isAssignableFrom(authentication));
+        return (CustomAuthentication.class.isAssignableFrom(authentication));
+    }
+
+    private class CustomUserDetailsChecker implements UserDetailsChecker {
+        private final Log logger;
+
+        private CustomUserDetailsChecker() {
+            this.logger = LogFactory.getLog(getClass());
+        }
+
+        @Override
+        public void check(UserDetails user) {
+            if (!user.isAccountNonLocked()) {
+                this.logger.debug("Failed to authenticate since user account is locked");
+                throw new LockedException("[AbstractUserDetailsAuthenticationProvider.locked User account is locked");
+            }
+            if (!user.isEnabled()) {
+                this.logger.debug("Failed to authenticate since user account is disabled");
+                throw new DisabledException("[AbstractUserDetailsAuthenticationProvider.disabled] User is disabled");
+            }
+            if (!user.isAccountNonExpired()) {
+                this.logger.debug("Failed to authenticate since user account has expired");
+                throw new AccountExpiredException("[AbstractUserDetailsAuthenticationProvider.expired] User account has expired");
+            }
+        }
+
     }
 }

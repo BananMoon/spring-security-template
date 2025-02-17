@@ -1,9 +1,6 @@
 package moon.thinkhard.spring_security_template.domain.account;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Account {
@@ -11,23 +8,22 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String email;
-    // TODO 저장 형태.
     private String password;
     private boolean locked;
     private char useYn;
 
-    public Account(String email, String password, boolean locked, char useYn) {
+    @Enumerated(EnumType.STRING)
+    private AccountAuth auth;
+
+    public Account(String email, String password, boolean locked, char useYn, AccountAuth auth) {
         this.email = email;
         this.password = password;
         this.locked = locked;
         this.useYn = useYn;
+        this.auth = auth;
     }
 
     protected Account() {
-    }
-
-    public boolean isValid() {
-        return !this.locked && this.useYn == 'Y';
     }
 
     public boolean isLocked() {
@@ -36,5 +32,16 @@ public class Account {
 
     public boolean isEnabled() {
         return this.useYn == 'Y';
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+    public AccountAuth getAuth() {
+        return auth;
     }
 }
