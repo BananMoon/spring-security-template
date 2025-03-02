@@ -1,9 +1,7 @@
 package moon.thinkhard.spring_security_template.authentication;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import moon.thinkhard.spring_security_template.authentication.dto.LoginRequest;
 import moon.thinkhard.spring_security_template.handler.CustomAuthenticationFailureHandler;
 import moon.thinkhard.spring_security_template.handler.CustomAuthenticationSuccessHandler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,21 +14,36 @@ import java.io.IOException;
 
 public class CustomAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
     private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login", "POST");
-    private final ObjectMapper objectMapper;
+    private static final String SPRING_SECURITY_FORM_ID_KEY = "id";
+    private static final String SPRING_SECURITY_FORM_PASSWORD_KEY = "password";
 
     public CustomAuthenticationFilter(AuthenticationManager authenticationManager) {
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER, authenticationManager);
-        this.objectMapper = new ObjectMapper();
         setAuthenticationFailureHandler(new CustomAuthenticationFailureHandler());
         setAuthenticationSuccessHandler(new CustomAuthenticationSuccessHandler());
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException {
-        LoginRequest requestBody = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        String id = this.obtainId(request);
+        String password = this.obtainPassword(request);
+        CustomAuthenticationDetails details = this.obtainDetails(request);
 
-        Authentication authRequest = new CustomAuthentication(requestBody.getId(), requestBody.getPassword());
+        CustomAuthentication authRequest = CustomAuthentication.unauthenticated(
+                id != null ? id.trim() : "",
+                password != null ? password : "",
+                details);
         return this.getAuthenticationManager().authenticate(authRequest);
+    }
+
+    protected String obtainId(HttpServletRequest request) {
+        return request.getParameter(SPRING_SECURITY_FORM_ID_KEY);
+    }
+    protected String obtainPassword(HttpServletRequest request) {
+        return request.getParameter(SPRING_SECURITY_FORM_PASSWORD_KEY);
+    }
+    protected CustomAuthenticationDetails obtainDetails(HttpServletRequest request) {
+        return new CustomAuthenticationDetails(request);
     }
 
 }

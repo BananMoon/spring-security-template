@@ -38,17 +38,23 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
      */
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        return internalAuthenticate((CustomAuthentication) authentication);
+    }
+
+    private CustomAuthentication internalAuthenticate(CustomAuthentication authentication) throws AuthenticationException {
         logger.info("Invoking CustomAuthenticationProvider.authenticate(Authentication)");
         if (!supports(authentication.getClass())) {
             return null;
         }
 
         String username = determineUsername(authentication);
-        UserDetails user = retrieveUser(username);
+        CustomAuthenticationDetails details = determineDetails(authentication);
+
+        CustomUserDetails user = retrieveUser(username);
         this.userDetailsChecker.check(user);
         additionalAuthenticationChecks(user, authentication);
 
-        return createSuccessAuthentication(username, user);
+        return createSuccessAuthentication(username, details, user);
     }
 
     /**
@@ -75,14 +81,18 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
      * @param user 사용자 정보를 담는 UserDetails 객체
      * @return 인증에 성공한 Authentication 객체
      */
-    private Authentication createSuccessAuthentication(String principal, UserDetails user) {
+    private CustomAuthentication createSuccessAuthentication(String principal, CustomAuthenticationDetails details, CustomUserDetails user) {
         logger.debug("Authenticated User");
 
-        return CustomAuthentication.authenticated(principal, user.getAuthorities());
+        return CustomAuthentication.authenticated(principal, details, user.getAuthorities());
     }
 
-    private String determineUsername(Authentication authentication) {
+    private String determineUsername(CustomAuthentication authentication) {
         return (authentication.getPrincipal() == null) ? "NONE_PROVIDED" : authentication.getName();
+    }
+
+    private CustomAuthenticationDetails determineDetails(CustomAuthentication authentication) {
+        return (CustomAuthenticationDetails) authentication.getDetails();
     }
 
     /**
@@ -90,9 +100,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
      * @param username 사용자 username
      * @return username에 해당하는 UserDetails
      */
-    private UserDetails retrieveUser(String username) {
+    private CustomUserDetails retrieveUser(String username) {
         try {
-            return this.userDetailsService.loadUserByUsername(username);
+            return (CustomUserDetails) this.userDetailsService.loadUserByUsername(username);
         } catch (Exception ex) {
             throw new InternalAuthenticationServiceException(ex.getMessage(), ex);
         }
@@ -110,7 +120,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return (CustomAuthentication.class.isAssignableFrom(authentication));
     }
 
-    private class CustomUserDetailsChecker implements UserDetailsChecker {
+    private static class CustomUserDetailsChecker implements UserDetailsChecker {
         private final Log logger;
 
         private CustomUserDetailsChecker() {
@@ -119,6 +129,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         @Override
         public void check(UserDetails user) {
+            this.internalCheck((CustomUserDetails) user);
+        }
+
+        private void internalCheck(CustomUserDetails user) {
             if (!user.isAccountNonLocked()) {
                 this.logger.debug("Failed to authenticate since user account is locked");
                 throw new LockedException("[AbstractUserDetailsAuthenticationProvider.locked User account is locked");
