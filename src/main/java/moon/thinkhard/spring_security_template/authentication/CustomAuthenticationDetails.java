@@ -9,12 +9,15 @@ import java.util.Objects;
 
 public class CustomAuthenticationDetails extends WebAuthenticationDetails {
     private static final String SPRING_SECURITY_FORM_ACCOUNT_TYPE_KEY = "accountType";
-
     private final AccountType accountType;
 
     public CustomAuthenticationDetails(HttpServletRequest request) {
         super(request);
         this.accountType = AccountType.from(request.getParameter(SPRING_SECURITY_FORM_ACCOUNT_TYPE_KEY));
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
     }
 
     @Override
