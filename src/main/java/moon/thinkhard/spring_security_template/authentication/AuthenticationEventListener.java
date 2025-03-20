@@ -1,4 +1,4 @@
-package moon.thinkhard.spring_security_template.custom;
+package moon.thinkhard.spring_security_template.authentication;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

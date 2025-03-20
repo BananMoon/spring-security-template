@@ -2,12 +2,11 @@ package moon.thinkhard.spring_security_template.config;
 
 import moon.thinkhard.spring_security_template.handler.CustomAuthenticationFailureHandler;
 import moon.thinkhard.spring_security_template.handler.CustomAuthenticationSuccessHandler;
+import moon.thinkhard.spring_security_template.utils.JwtUtils;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -21,6 +20,12 @@ import org.springframework.security.web.header.writers.XXssProtectionHeaderWrite
 //@EnableWebSecurity
 //@Configuration
 public class SecurityConfigWithFormLogin {
+    private final JwtUtils jwtUtils;
+
+    public SecurityConfigWithFormLogin(JwtUtils jwtUtils) {
+        this.jwtUtils = jwtUtils;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -42,7 +47,7 @@ public class SecurityConfigWithFormLogin {
                                  .usernameParameter("id")
                                  .passwordParameter("password")
                                  .loginProcessingUrl("/login")
-                                 .successHandler(new CustomAuthenticationSuccessHandler())
+                                 .successHandler(new CustomAuthenticationSuccessHandler(jwtUtils))
                                  .failureHandler(new CustomAuthenticationFailureHandler())
                                  .permitAll()
                 )

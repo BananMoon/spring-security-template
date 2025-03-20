@@ -33,9 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        CustomUserDetails userDetails = this.loadUsersByUsername(username);
-
-        return new CustomUserDetails(username, userDetails.getPassword(), userDetails.getAuthorities(), userDetails.isAccountNonLocked(), userDetails.isEnabled());
+        return this.loadUsersByUsername(username);
     }
 
     protected CustomUserDetails loadUsersByUsername(String username) {

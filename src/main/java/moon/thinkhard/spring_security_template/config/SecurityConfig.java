@@ -1,6 +1,7 @@
 package moon.thinkhard.spring_security_template.config;
 
 import moon.thinkhard.spring_security_template.authentication.CustomAuthenticationFilter;
+import moon.thinkhard.spring_security_template.authentication.config.JwtProperties;
 import moon.thinkhard.spring_security_template.handler.CustomAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,9 +20,11 @@ import org.springframework.security.web.header.writers.XXssProtectionHeaderWrite
 @Configuration
 public class SecurityConfig {
     private final AuthenticationProvider customAuthenticationProvider;
+    private final JwtProperties jwtProperties;
 
-    public SecurityConfig(AuthenticationProvider customAuthenticationProvider) {
+    public SecurityConfig(AuthenticationProvider customAuthenticationProvider, JwtProperties jwtProperties) {
         this.customAuthenticationProvider = customAuthenticationProvider;
+        this.jwtProperties = jwtProperties;
     }
 
     @Bean
@@ -44,7 +47,7 @@ public class SecurityConfig {
                                 .accessDeniedHandler(new CustomAccessDeniedHandler())
                 )
                 .httpBasic(Customizer.withDefaults())
-                .addFilterBefore(new CustomAuthenticationFilter(new ProviderManager(customAuthenticationProvider)), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new CustomAuthenticationFilter(new ProviderManager(customAuthenticationProvider), jwtProperties), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

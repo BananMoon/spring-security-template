@@ -13,9 +13,9 @@ public class Account {
     private char useYn;
 
     @Enumerated(EnumType.STRING)
-    private AccountAuth auth;
+    private AccountType auth;
 
-    public Account(String email, String password, boolean locked, char useYn, AccountAuth auth) {
+    public Account(String email, String password, boolean locked, char useYn, AccountType auth) {
         this.email = email;
         this.password = password;
         this.locked = locked;
@@ -41,7 +41,7 @@ public class Account {
     public String getEmail() {
         return email;
     }
-    public AccountAuth getAuth() {
+    public AccountType getAuth() {
         return auth;
     }
 }

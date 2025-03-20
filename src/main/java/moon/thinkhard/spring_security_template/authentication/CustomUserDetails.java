@@ -12,19 +12,19 @@ public class CustomUserDetails implements UserDetails {
     private final String password;
 
     private final Set<GrantedAuthority> authorities;
-    private final boolean accountNonLocked;
+    private final boolean accountLocked;
     private final boolean enabled;
 
 
     public CustomUserDetails(String username, String password, Collection<? extends GrantedAuthority> authorities,
-                             boolean accountNonLocked, boolean enabled) {
+                             boolean accountLocked, boolean enabled) {
         Assert.isTrue(username != null && !"".equals(username) && password != null,
                 "Cannot pass null or empty values to constructor");
 
         this.username = username;
         this.password = password;
         this.authorities = Set.copyOf(authorities);
-        this.accountNonLocked = accountNonLocked;
+        this.accountLocked = accountLocked;
         this.enabled = enabled;
     }
 
@@ -46,11 +46,11 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return isAccountNonLocked();
+        return !accountLocked;
     }
 
     @Override
     public boolean isEnabled() {
-        return isEnabled();
+        return enabled;
     }
 }

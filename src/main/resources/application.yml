@@ -28,3 +28,6 @@ logging:
     org.springframework.security: TRACE
     org.springframework.web: DEBUG
     org.springframework: DEBUG
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
