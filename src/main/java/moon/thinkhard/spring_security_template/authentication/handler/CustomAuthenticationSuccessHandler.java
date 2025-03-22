@@ -1,4 +1,4 @@
-package moon.thinkhard.spring_security_template.handler;
+package moon.thinkhard.spring_security_template.authentication.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;

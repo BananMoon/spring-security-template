@@ -1,7 +1,7 @@
-package moon.thinkhard.spring_security_template.config;
+package moon.thinkhard.spring_security_template.authentication.config;
 
-import moon.thinkhard.spring_security_template.handler.CustomAuthenticationFailureHandler;
-import moon.thinkhard.spring_security_template.handler.CustomAuthenticationSuccessHandler;
+import moon.thinkhard.spring_security_template.authentication.handler.CustomAuthenticationFailureHandler;
+import moon.thinkhard.spring_security_template.authentication.handler.CustomAuthenticationSuccessHandler;
 import moon.thinkhard.spring_security_template.utils.JwtUtils;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;

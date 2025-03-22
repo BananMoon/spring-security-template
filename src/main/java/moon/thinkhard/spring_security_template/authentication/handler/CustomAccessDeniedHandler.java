@@ -1,4 +1,4 @@
-package moon.thinkhard.spring_security_template.handler;
+package moon.thinkhard.spring_security_template.authentication.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
