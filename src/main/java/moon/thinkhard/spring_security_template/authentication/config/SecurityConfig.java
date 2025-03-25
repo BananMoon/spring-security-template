@@ -1,8 +1,7 @@
-package moon.thinkhard.spring_security_template.config;
+package moon.thinkhard.spring_security_template.authentication.config;
 
 import moon.thinkhard.spring_security_template.authentication.CustomAuthenticationFilter;
-import moon.thinkhard.spring_security_template.authentication.config.JwtProperties;
-import moon.thinkhard.spring_security_template.handler.CustomAccessDeniedHandler;
+import moon.thinkhard.spring_security_template.authentication.handler.CustomAccessDeniedHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
