@@ -21,10 +21,11 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         super(DEFAULT_ANT_PATH_REQUEST_MATCHER, authenticationManager);
         setAuthenticationFailureHandler(new CustomAuthenticationFailureHandler());
         setAuthenticationSuccessHandler(new CustomAuthenticationSuccessHandler(new JwtUtils(jwtProperties)));
-    }
+}
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        logger.info("Invoking CustomAuthenticationFilter.attemptAuthentication(request, response)");
         String id = this.obtainId(request);
         String password = this.obtainPassword(request);
         CustomAuthenticationDetails details = this.obtainDetails(request);
