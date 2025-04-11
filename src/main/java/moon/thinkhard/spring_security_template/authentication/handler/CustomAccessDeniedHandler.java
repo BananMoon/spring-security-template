@@ -11,7 +11,7 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import java.io.IOException;
 
 /**
- * 요청한 리소스에 접근할 권한이 없을 때 AccessDeniedException이 발생하며, 이 핸들러가 이를 처리합니다.
+ * 인증이 완료되었으나, 요청한 리소스에 접근할 권한이 없을 때 AccessDeniedException이 발생하며, 이 핸들러가 이를 처리합니다.
  */
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     private final Log logger;
@@ -29,9 +29,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     private void setResponse(HttpServletResponse response) throws IOException {
         response.setStatus(HttpStatus.FORBIDDEN.value());
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Type", "text/plain;charset=UTF-8");
-        response.getWriter().write("🤖 Your access is denied. Please log in again.");
         response.sendRedirect("/loginPage.html");
     }
 }

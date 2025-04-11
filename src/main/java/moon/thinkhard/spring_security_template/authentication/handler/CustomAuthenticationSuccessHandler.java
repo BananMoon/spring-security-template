@@ -16,8 +16,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 인증에 시도했는데 성공했을 때 응답을 핸들링한다.
+ */
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
     private static final String TOKEN_RESPONSE_KEY = "token";
+    private static final String RESPONSE_MESSAGE_KEY = "msg";
 
     private final Log logger;
     private final JwtUtils jwtUtils;
@@ -42,6 +46,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         response.setStatus(HttpStatus.OK.value());
 
         Map<String, String> responseBody = new HashMap<>();
+        responseBody.put(RESPONSE_MESSAGE_KEY, "🤖👏 You have now successfully logged in.");
         responseBody.put(TOKEN_RESPONSE_KEY, jwtToken);
         new ObjectMapper().writeValue(response.getWriter(), responseBody);
     }
