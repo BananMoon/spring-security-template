@@ -16,6 +16,11 @@ public class CustomAuthenticationDetails extends WebAuthenticationDetails {
         this.accountType = AccountType.from(request.getParameter(SPRING_SECURITY_FORM_ACCOUNT_TYPE_KEY));
     }
 
+    public CustomAuthenticationDetails(HttpServletRequest request, AccountType accountType) {
+        super(request);
+        this.accountType = accountType;
+    }
+
     public AccountType getAccountType() {
         return accountType;
     }
